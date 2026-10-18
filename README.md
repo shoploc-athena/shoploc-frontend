@@ -109,6 +109,7 @@ npm run build
 ```
 
 The same three commands run in the CI on every pull request.
+The pipeline (`.github/workflows/ci.yml`) also builds the Docker image. On every push to `develop` and `main`, it publishes the image to the GitHub Container Registry (`ghcr.io/shoploc-athena/shoploc-frontend`), tagged with the branch name and the commit SHA (`latest` for `main`).
 
 ## Offline support (PWA)
 
@@ -135,12 +136,13 @@ See [SECURITY.md](SECURITY.md) to report a vulnerability. Dependencies and GitHu
 
 | Item | Status |
 |---|---|
-| Project skeleton (Vite, React, Redux Toolkit) | In progress |
-| Product list page | Planned |
-| Offline support (Workbox) | Planned |
-| Unit tests | Planned |
-| Docker image and gateway | Planned |
-| CI pipeline | Planned |
+| Project skeleton (Vite, React, Redux Toolkit) | Done |
+| Product list page | Done |
+| Offline support (Workbox) | Done |
+| Unit tests | Done |
+| Docker image and gateway | Done |
+| CI pipeline | Done |
+| Docker image published to GHCR | Done |
 | End-to-end tests | Planned |
 
 ## Team
