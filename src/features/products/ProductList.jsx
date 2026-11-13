@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from './productsSlice';
+import ProductCatalog from './ProductCatalog';
 
 export default function ProductList() {
     const dispatch = useDispatch();
@@ -11,16 +12,5 @@ export default function ProductList() {
         dispatch(fetchProducts());
     }, [dispatch]);
 
-    if (status === 'loading') return <p>Chargement…</p>;
-    if (status === 'failed') return <p>Erreur : {error}</p>;
-
-    return (
-        <ul>
-            {items.map((p) => (
-                <li key={p.id}>
-                    {p.name} : {p.price} €
-                </li>
-            ))}
-        </ul>
-    );
+    return <ProductCatalog items={items} status={status} error={error} />;
 }
