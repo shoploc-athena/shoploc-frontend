@@ -43,7 +43,7 @@ ShopLoc connects customers, local merchants, the city hall and the merchants' as
 | UI | React |
 | State management | Redux Toolkit |
 | Offline support | Workbox (through `vite-plugin-pwa`) |
-| Tests | Vitest |
+| Tests | Vitest, Testing Library, axe-core |
 | Static analysis | ESLint |
 | Container | Docker (multi-stage build) with nginx |
 | CI/CD | GitHub Actions |
@@ -75,7 +75,7 @@ The application is available at `http://localhost:5173`. In development, request
 | `npm run build` | Build the application for production (`dist/`) |
 | `npm run preview` | Serve the production build locally |
 | `npm run lint` | Run the static analysis (ESLint) |
-| `npm test` | Run the unit tests (Vitest) |
+| `npm test` | Run component tests and automated axe accessibility audits |
 
 ## Configuration
 
@@ -92,7 +92,9 @@ shoploc-frontend
 ├── src/
 │   ├── app/                  # Redux store
 │   ├── features/             # One folder per feature (slice, components, tests)
-│   │   └── products/
+│   │   ├── products/
+│   │   └── stores/
+│   ├── test/                 # Shared Vitest setup and axe audit helper
 │   ├── App.jsx
 │   └── main.jsx
 ├── index.html
@@ -109,6 +111,7 @@ npm run build
 ```
 
 The same three commands run in the CI on every pull request.
+Component tests cover catalogue and store-detail loading, empty, error, and success states; axe audits run in the same Vitest job.
 The pipeline (`.github/workflows/ci.yml`) also builds the Docker image. On every push to `develop` and `main`, it publishes the image to the GitHub Container Registry (`ghcr.io/shoploc-athena/shoploc-frontend`), tagged with the branch name and the commit SHA (`latest` for `main`).
 
 ## Offline support (PWA)

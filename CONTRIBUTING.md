@@ -58,6 +58,7 @@ Write the summary in the imperative, in English.
 
 - Run `npm run lint`, `npm test` and `npm run build` before pushing.
 - Add or update unit tests for every behaviour change.
+- For UI changes, cover loading, empty and error states with component tests and run the automated axe accessibility audit.
 - Do not commit secrets, passwords, or tokens.
 - Do not add a new dependency without a good reason: every library makes the application heavier.
 - Fix issues reported by the CI, or explain in the pull request why they are accepted.
