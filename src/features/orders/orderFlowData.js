@@ -64,6 +64,10 @@ export const INITIAL_ORDERS = [
         paymentMethod: 'Paiement en ligne',
         pickupCode: '583 214',
         stores: ['Maison Levain', 'Les Jardins de Léa'],
+        pickupSlots: {
+            'Maison Levain': 'Aujourd’hui, 16 h – 17 h',
+            'Les Jardins de Léa': 'Aujourd’hui, 17 h – 18 h',
+        },
         refundDue: 0,
     },
     {
