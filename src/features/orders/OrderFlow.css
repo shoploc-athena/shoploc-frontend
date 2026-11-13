@@ -248,21 +248,6 @@ summary:focus-visible {
     color: var(--ink);
 }
 
-.accessibility-notes {
-    margin-bottom: 20px;
-    padding: 14px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: white;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-.accessibility-notes summary {
-    cursor: pointer;
-    font-weight: 700;
-}
-
 .preview-title,
 .preview-description {
     margin: 0;

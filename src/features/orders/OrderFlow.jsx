@@ -25,15 +25,6 @@ const SCREEN_TITLES = {
     detail: 'Détail de commande',
 };
 
-const ACCESSIBILITY_NOTES = {
-    catalogue: 'Catalogue de démonstration statique, sans appel API. Le catalogue livré reste hors du périmètre de cette maquette.',
-    cart: 'Quantités : boutons nommés par produit, quantité annoncée et total recalculé. Chaque commerce possède son propre titre.',
-    payment: 'Chaque liste de créneaux porte le nom du commerce. Le groupe de paiement est nommé ; les touches fléchées changent le choix. Le champ Stripe est une illustration non saisissable.',
-    confirmation: 'Référence, créneaux et code de retrait disponibles en texte. Le code est fictif et ne doit pas être utilisé en commerce.',
-    orders: 'Chaque commande est un bouton accessible au clavier. Le statut est écrit en toutes lettres et ne dépend pas seulement de sa couleur.',
-    detail: 'Étape courante identifiée par aria-current. La demande d’annulation ouvre une boîte de dialogue : focus contenu, Échap pour fermer et retour au déclencheur.',
-};
-
 const CURRENCY_FORMATTER = new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency: 'EUR',
@@ -282,18 +273,6 @@ export default function OrderFlow() {
                         Réinitialiser la démo
                     </button>
                 </section>
-
-                <details className="accessibility-notes">
-                    <summary>Annotations d’accessibilité · revue GLOP-95</summary>
-                    <p>{ACCESSIBILITY_NOTES[screen]}</p>
-                    <p>
-                        Navigation clavier avec focus visible ; focus sur le titre lors d’un changement
-                        d’écran. Chargement annoncé par un statut, erreur par une alerte.
-                        Vérifier à 320 et 390 px, sur desktop et à un zoom de 200 %.
-                        Les animations respectent la préférence de réduction des mouvements.
-                    </p>
-                    <p>Dossier de conception et grille de recette : design/GLOP-95.md dans le dépôt.</p>
-                </details>
 
                 {screen === 'catalogue' && (
                     <section className="content-card" aria-labelledby="catalogue-title">
