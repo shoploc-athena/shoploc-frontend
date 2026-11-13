@@ -1,5 +1,4 @@
-import { useMemo, useState } from 'react';
-import ProductList from '../products/ProductList';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     getCartTotal,
     getOrderStatus,
@@ -16,6 +15,24 @@ const PREVIEW_STATES = [
     { id: 'loading', label: 'Chargement' },
     { id: 'error', label: 'Erreur' },
 ];
+
+const SCREEN_TITLES = {
+    catalogue: 'Commerces · aperçu',
+    cart: 'Mon panier',
+    payment: 'Retrait et paiement',
+    confirmation: 'Commande confirmée',
+    orders: 'Mes commandes',
+    detail: 'Détail de commande',
+};
+
+const ACCESSIBILITY_NOTES = {
+    catalogue: 'Catalogue de démonstration statique, sans appel API. Le catalogue livré reste hors du périmètre de cette maquette.',
+    cart: 'Quantités : boutons nommés par produit, quantité annoncée et total recalculé. Chaque commerce possède son propre titre.',
+    payment: 'Chaque liste de créneaux porte le nom du commerce. Le groupe de paiement est nommé ; les touches fléchées changent le choix. Le champ Stripe est une illustration non saisissable.',
+    confirmation: 'Référence, créneaux et code de retrait disponibles en texte. Le code est fictif et ne doit pas être utilisé en commerce.',
+    orders: 'Chaque commande est un bouton accessible au clavier. Le statut est écrit en toutes lettres et ne dépend pas seulement de sa couleur.',
+    detail: 'Étape courante identifiée par aria-current. La demande d’annulation ouvre une boîte de dialogue : focus contenu, Échap pour fermer et retour au déclencheur.',
+};
 
 const CURRENCY_FORMATTER = new Intl.NumberFormat('fr-FR', {
     style: 'currency',
@@ -84,9 +101,14 @@ export default function OrderFlow() {
     const [pickupSlots, setPickupSlots] = useState({});
     const [paymentMethod, setPaymentMethod] = useState('online');
     const [paymentPending, setPaymentPending] = useState(false);
-    const [activeOrderId, setActiveOrderId] = useState(null);
+    const [activeOrderId, setActiveOrderId] = useState(INITIAL_ORDERS[0].id);
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [cancelRequested, setCancelRequested] = useState(false);
+    const titleRef = useRef(null);
+
+    useEffect(() => {
+        titleRef.current.focus();
+    }, [screen, cancelRequested]);
 
     const cartTotal = useMemo(() => getCartTotal(cart), [cart]);
     const visibleCart = previewState === 'empty' ? [] : cart;
@@ -109,7 +131,7 @@ export default function OrderFlow() {
 
     function completePayment() {
         const newOrder = {
-            id: 'SL-2051',
+            id: `SL-${2051 + orders.length - INITIAL_ORDERS.length}`,
             status: 'CONFIRMEE',
             total: cartTotal,
             createdAt: 'À l’instant',
@@ -139,6 +161,8 @@ export default function OrderFlow() {
 
     function changeOrderStatus(status) {
         if (!activeOrder) return;
+        setCancelRequested(false);
+        setCancelDialogOpen(false);
         setOrders((items) => items.map((order) => order.id === activeOrder.id
             ? {
                 ...order,
@@ -154,19 +178,22 @@ export default function OrderFlow() {
         setScreen(nextScreen);
         setPreviewState('success');
         setPaymentPending(false);
+        setCancelDialogOpen(false);
     }
 
-    const screenTitles = {
-        catalogue: 'Commerces',
-        cart: 'Mon panier',
-        payment: 'Paiement',
-        confirmation: 'Commande confirmée',
-        orders: 'Mes commandes',
-        detail: 'Détail de commande',
-    };
+    function resetPreview() {
+        setCart(INITIAL_CART);
+        setOrders(INITIAL_ORDERS);
+        setPickupSlots({});
+        setPaymentMethod('online');
+        setActiveOrderId(INITIAL_ORDERS[0].id);
+        setCancelRequested(false);
+        navigate('cart');
+    }
 
     return (
         <div className="shoploc-app">
+            <a className="skip-link" href="#page-title">Aller au contenu</a>
             <header className="app-header">
                 <a className="brand" href="#accueil" onClick={(event) => {
                     event.preventDefault();
@@ -176,9 +203,9 @@ export default function OrderFlow() {
                     <span>shoploc<span className="brand-dot">.</span></span>
                 </a>
                 <p className="city-label"><span aria-hidden="true">⌖</span> Lille, centre-ville</p>
-                <button className="profile-button" type="button" aria-label="Profil de Camille">
+                <span className="profile-button" role="img" aria-label="Profil fictif de Camille">
                     <span aria-hidden="true">C</span>
-                </button>
+                </span>
             </header>
 
             <nav className="primary-nav" aria-label="Navigation principale">
@@ -195,7 +222,7 @@ export default function OrderFlow() {
                         ? 'nav-item nav-item--active'
                         : 'nav-item'}
                     type="button"
-                    aria-current={screen === 'cart' ? 'page' : undefined}
+                    aria-current={['cart', 'payment', 'confirmation'].includes(screen) ? 'page' : undefined}
                     onClick={() => navigate('cart')}
                 >
                     Panier <span className="nav-count" aria-label={`${cartCount} articles`}>{cartCount}</span>
@@ -205,7 +232,7 @@ export default function OrderFlow() {
                         ? 'nav-item nav-item--active'
                         : 'nav-item'}
                     type="button"
-                    aria-current={screen === 'orders' ? 'page' : undefined}
+                    aria-current={screen === 'orders' || screen === 'detail' ? 'page' : undefined}
                     onClick={() => navigate('orders')}
                 >
                     Mes commandes
@@ -216,7 +243,7 @@ export default function OrderFlow() {
                 <section className="page-heading" aria-labelledby="page-title">
                     <div>
                         <p className="eyebrow">VOTRE COMMERCE DE PROXIMITÉ</p>
-                        <h1 id="page-title">{screenTitles[screen]}</h1>
+                        <h1 id="page-title" ref={titleRef} tabIndex={-1}>{SCREEN_TITLES[screen]}</h1>
                     </div>
                     <span className="prototype-badge">Prototype · règles à valider PO</span>
                 </section>
@@ -226,6 +253,14 @@ export default function OrderFlow() {
                         <p className="preview-title">État de l’écran</p>
                         <p className="preview-description">Aperçu provisoire pour revue de conception</p>
                     </div>
+                    <label className="screen-preview">
+                        Écran à prévisualiser
+                        <select value={screen} onChange={(event) => navigate(event.target.value)}>
+                            {Object.entries(SCREEN_TITLES).map(([id, title]) => (
+                                <option key={id} value={id}>{title}</option>
+                            ))}
+                        </select>
+                    </label>
                     <div className="preview-options" role="group" aria-label="Choisir un état d’interface">
                         {PREVIEW_STATES.map((state) => (
                             <button
@@ -236,13 +271,29 @@ export default function OrderFlow() {
                                 onClick={() => {
                                     setPreviewState(state.id);
                                     setPaymentPending(false);
+                                    setCancelDialogOpen(false);
                                 }}
                             >
                                 {state.label}
                             </button>
                         ))}
                     </div>
+                    <button className="button button--secondary" type="button" onClick={resetPreview}>
+                        Réinitialiser la démo
+                    </button>
                 </section>
+
+                <details className="accessibility-notes">
+                    <summary>Annotations d’accessibilité · revue GLOP-95</summary>
+                    <p>{ACCESSIBILITY_NOTES[screen]}</p>
+                    <p>
+                        Navigation clavier avec focus visible ; focus sur le titre lors d’un changement
+                        d’écran. Chargement annoncé par un statut, erreur par une alerte.
+                        Vérifier à 320 et 390 px, sur desktop et à un zoom de 200 %.
+                        Les animations respectent la préférence de réduction des mouvements.
+                    </p>
+                    <p>Dossier de conception et grille de recette : design/GLOP-95.md dans le dépôt.</p>
+                </details>
 
                 {screen === 'catalogue' && (
                     <section className="content-card" aria-labelledby="catalogue-title">
@@ -254,7 +305,11 @@ export default function OrderFlow() {
                             <span className="result-count">Catalogue</span>
                         </div>
                         {previewState === 'success'
-                            ? <ProductList />
+                            ? <ul>
+                                {INITIAL_CART.map((item) => (
+                                    <li key={item.id}>{item.name} — {formatPrice(item.price)}</li>
+                                ))}
+                            </ul>
                             : <StatePanel
                                 state={previewState}
                                 onRetry={() => setPreviewState('success')}
@@ -337,8 +392,9 @@ export default function OrderFlow() {
                 )}
 
                 <p className="prototype-note">
-                    Prototype de travail GLOP-95. Les règles de panier multi-commerces, de paiement
-                    et d’annulation restent à confirmer par le PO.
+                    Prototype de conception GLOP-95 : données fictives, aucune commande, aucun paiement
+                    ni aucune annulation envoyés. Les règles multi-commerces et les transitions de
+                    statut restent à confirmer par le PO.
                 </p>
             </main>
         </div>
@@ -503,7 +559,9 @@ function PaymentScreen({
                             </>
                         )}
                         <button className="button button--primary" type="button" onClick={onComplete}>
-                            Simuler la confirmation de paiement
+                            {paymentMethod === 'online'
+                                ? 'Simuler la confirmation de paiement'
+                                : 'Simuler la confirmation de commande'}
                         </button>
                     </div>
                 ) : (
@@ -532,6 +590,7 @@ function PaymentScreen({
                                         </span>
                                         <select
                                             aria-label={`Créneau de retrait chez ${store.name}`}
+                                            aria-describedby="pickup-requirement"
                                             value={pickupSlots[store.id] ?? ''}
                                             onChange={(event) => {
                                                 onPickupSlotChange(store.id, event.target.value);
@@ -546,11 +605,11 @@ function PaymentScreen({
                             <p className="inline-hint"><span aria-hidden="true">ⓘ</span> Le retrait se fait directement auprès de chaque commerçant.</p>
                         </section>
 
-                        {!pickupSlotsReady && (
-                            <p className="validation-hint" role="status">
-                                Choisissez un créneau pour chaque commerce afin de continuer.
-                            </p>
-                        )}
+                        <p id="pickup-requirement" className="validation-hint" role="status">
+                            {pickupSlotsReady
+                                ? 'Tous les créneaux sont sélectionnés.'
+                                : 'Choisissez un créneau pour chaque commerce afin de continuer.'}
+                        </p>
 
                         <section className="form-section" aria-labelledby="payment-method-title">
                             <div className="form-section-heading">
@@ -560,7 +619,7 @@ function PaymentScreen({
                                     <p>Choisissez comment régler votre commande.</p>
                                 </div>
                             </div>
-                            <div className="payment-options">
+                            <div className="payment-options" role="radiogroup" aria-labelledby="payment-method-title">
                                 <label className={paymentMethod === 'online' ? 'payment-option payment-option--selected' : 'payment-option'}>
                                     <input
                                         type="radio"
@@ -592,6 +651,18 @@ function PaymentScreen({
                                     <span className="payment-option-icon" aria-hidden="true">⌑</span>
                                 </label>
                             </div>
+                            {paymentMethod === 'online' && (
+                                <div className="stripe-preview">
+                                    <div className="stripe-placeholder">
+                                        <span className="stripe-wordmark">stripe</span>
+                                        <span>Emplacement du champ carte hébergé par Stripe</span>
+                                    </div>
+                                    <p>
+                                        Illustration uniquement : ne saisissez aucune donnée bancaire.
+                                        Le futur champ sécurisé sera fourni par Stripe, jamais par ShopLoc.
+                                    </p>
+                                </div>
+                            )}
                         </section>
                         <div className="payment-actions">
                             <button className="button button--text" type="button" onClick={onBack}>
@@ -603,7 +674,9 @@ function PaymentScreen({
                                 disabled={!pickupSlotsReady}
                                 onClick={onPay}
                             >
-                                {paymentMethod === 'online' ? 'Continuer vers Stripe' : 'Confirmer la commande'}
+                                {paymentMethod === 'online'
+                                    ? 'Simuler l’attente Stripe'
+                                    : 'Simuler la validation de commande'}
                                 <span aria-hidden="true">→</span>
                             </button>
                         </div>
@@ -618,7 +691,9 @@ function PaymentScreen({
                     {stores.map((store) => (
                         <div className="summary-store" key={store.id}>
                             <strong>{store.name}</strong>
-                            <span>{cart.filter((item) => item.storeId === store.id).length} articles</span>
+                            <span>{formatArticleCount(cart
+                                .filter((item) => item.storeId === store.id)
+                                .reduce((total, item) => total + item.quantity, 0))}</span>
                         </div>
                     ))}
                     <div className="summary-total">
@@ -793,13 +868,14 @@ function OrderDetailScreen({
                             <li
                                 className={order.status === item.code ? 'tracking-step tracking-step--current' : 'tracking-step'}
                                 key={item.code}
+                                aria-current={order.status === item.code ? 'step' : undefined}
                             >
                                 <span className="tracking-marker" aria-hidden="true">{index + 1}</span>
                                 <span className="tracking-copy">
                                     <strong>{item.label}</strong>
                                     <small>{item.code}</small>
                                 </span>
-                                {item.code === order.status && <span className="current-label">En cours</span>}
+                                {item.code === order.status && <span className="current-label">Étape actuelle</span>}
                             </li>
                         ))}
                     </ol>
@@ -822,7 +898,8 @@ function OrderDetailScreen({
                 )}
                 {cancelRequested && (
                     <div className="request-banner" role="status">
-                        Votre demande d’annulation a été enregistrée. Elle doit être confirmée par le commerce.
+                        Simulation : demande d’annulation affichée localement. Aucune demande n’a été
+                        envoyée au commerce.
                     </div>
                 )}
                 {!terminal && !cancelRequested && (
@@ -839,22 +916,7 @@ function OrderDetailScreen({
                     <p>Liste de statuts affichée pour revue ; transitions définitives à confirmer avec le PO.</p>
                 </details>
                 {cancelDialogOpen && (
-                    <div className="dialog-backdrop">
-                        <section className="cancel-dialog" role="dialog" aria-modal="true" aria-labelledby="cancel-title">
-                            <button className="dialog-close" type="button" aria-label="Fermer" onClick={onCloseCancel}>×</button>
-                            <p className="eyebrow">COMMANDE {order.id}</p>
-                            <h3 id="cancel-title">Demander une annulation ?</h3>
-                            <p>Le commerce devra confirmer votre demande. Les conditions de remboursement restent à préciser.</p>
-                            <form onSubmit={onSubmitCancel}>
-                                <label htmlFor="cancel-reason">Motif (facultatif)</label>
-                                <textarea id="cancel-reason" name="reason" rows="3" placeholder="Indiquez le motif de votre demande" />
-                                <div className="dialog-actions">
-                                    <button className="button button--text" type="button" onClick={onCloseCancel}>Retour</button>
-                                    <button className="button button--primary" type="submit">Envoyer la demande</button>
-                                </div>
-                            </form>
-                        </section>
-                    </div>
+                    <CancelRequestDialog order={order} onClose={onCloseCancel} onSubmit={onSubmitCancel} />
                 )}
             </section>
             <aside className="content-card detail-summary" aria-labelledby="detail-summary-title">
@@ -882,5 +944,45 @@ function OrderDetailScreen({
                 )}
             </aside>
         </div>
+    );
+}
+
+function CancelRequestDialog({ order, onClose, onSubmit }) {
+    const dialogRef = useRef(null);
+
+    useEffect(() => {
+        const dialog = dialogRef.current;
+        const trigger = document.activeElement;
+        dialog.showModal();
+        return () => {
+            dialog.close();
+            if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus();
+        };
+    }, []);
+
+    return (
+        <dialog
+            ref={dialogRef}
+            className="cancel-dialog"
+            aria-labelledby="cancel-title"
+            aria-describedby="cancel-description"
+            onCancel={onClose}
+        >
+            <button className="dialog-close" type="button" aria-label="Fermer" onClick={onClose}>×</button>
+            <p className="eyebrow">COMMANDE {order.id}</p>
+            <h3 id="cancel-title">Demander une annulation ?</h3>
+            <p id="cancel-description">
+                Simulation sans envoi. Le commerce devra confirmer la demande réelle.
+                Les conditions de remboursement restent à préciser avec le PO.
+            </p>
+            <form onSubmit={onSubmit}>
+                <label htmlFor="cancel-reason">Motif fictif (facultatif, sans donnée personnelle)</label>
+                <textarea id="cancel-reason" name="reason" rows="3" placeholder="Exemple : indisponibilité" />
+                <div className="dialog-actions">
+                    <button className="button button--text" type="button" onClick={onClose}>Retour</button>
+                    <button className="button button--primary" type="submit">Simuler la demande</button>
+                </div>
+            </form>
+        </dialog>
     );
 }
