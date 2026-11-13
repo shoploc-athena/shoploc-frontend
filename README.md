@@ -112,6 +112,8 @@ npm run build
 
 The same three commands run in the CI on every pull request.
 Component tests cover catalogue and store-detail loading, empty, error, and success states; axe audits run in the same Vitest job.
+Connected catalogue tests also cover pending requests, empty and populated API responses, HTTP errors, and network failures using a fresh Redux store and mocked fetch requests. No running backend is required.
+The JSDOM axe audit excludes color contrast because JSDOM does not render layout; browser-based contrast checks and manual accessibility review remain necessary.
 The pipeline (`.github/workflows/ci.yml`) also builds the Docker image. On every push to `develop` and `main`, it publishes the image to the GitHub Container Registry (`ghcr.io/shoploc-athena/shoploc-frontend`), tagged with the branch name and the commit SHA (`latest` for `main`).
 
 ## Offline support (PWA)
