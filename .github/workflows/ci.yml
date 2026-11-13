@@ -20,7 +20,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npm test
+      - name: Run component tests and axe accessibility audit
+        run: npm test
       - run: npm run build
       - name: Build Docker image
         run: docker build -t shoploc-frontend .
