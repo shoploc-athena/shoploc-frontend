@@ -1,10 +1,5 @@
-import ProductList from './features/products/ProductList';
+import OrderFlow from './features/orders/OrderFlow';
 
 export default function App() {
-  return (
-      <main>
-        <h1>ShopLoc</h1>
-        <ProductList />
-      </main>
-  );
+    return <OrderFlow />;
 }
