@@ -90,8 +90,8 @@ Les transitions métier et permissions ne sont pas validées par ce prototype.
 
 ## Annotations d'accessibilité
 
-Ces annotations sont également consultables dans chaque écran, dans
-**Annotations d'accessibilité · revue GLOP-95**.
+Ces annotations sont conservées dans ce dossier de conception uniquement ;
+elles ne sont pas affichées dans les écrans du prototype.
 
 - Document déclaré en français. Un titre principal par écran, sections nommées,
   titres par commerce et listes pour les articles et le suivi.
@@ -100,7 +100,10 @@ Ces annotations sont également consultables dans chaque écran, dans
 - Navigation native au clavier, focus visible, boutons de quantité nommés par produit.
   La nouvelle quantité est annoncée ; le montant est affiché en texte.
 - Listes de créneaux nommées par commerce, consigne reliée par `aria-describedby`.
-  Radios regroupées et nommées pour le paiement.
+  Radios regroupées et nommées pour le paiement ; choix avec les touches fléchées.
+- Confirmation : référence, créneaux et code de retrait disponibles en texte.
+  Le code est fictif et ne doit pas être utilisé en commerce.
+- Historique : chaque commande est un bouton accessible au clavier.
 - Chargement en `role="status"`, erreur en `role="alert"`. Le statut de commande
   comporte un libellé et un code, sans dépendance exclusive à la couleur.
 - Étape courante de suivi identifiée par `aria-current="step"`.
