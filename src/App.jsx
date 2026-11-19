@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import OrderFlow from './features/orders/OrderFlow';
 import ProductList from './features/products/ProductList';
 import StoreDetail from './features/stores/StoreDetail';
 import StoreDirectory from './features/stores/StoreDirectory';
@@ -13,6 +14,14 @@ const DEMO_STORES = [
 ];
 
 export default function App() {
+  if (window.location.pathname.replace(/\/$/, '') === '/prototype/commande') {
+    return <OrderFlow />;
+  }
+
+  return <Catalogue />;
+}
+
+function Catalogue() {
   const [section, setSection] = useState('catalogue');
   const [selectedStore, setSelectedStore] = useState(null);
 
@@ -40,6 +49,7 @@ export default function App() {
           >
             Commerces
           </button>
+          <a href="/prototype/commande">Prototype de commande</a>
         </nav>
         {section === 'catalogue' && (
           <section aria-labelledby="catalogue-title">

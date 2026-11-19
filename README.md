@@ -50,12 +50,24 @@ ShopLoc connects customers, local merchants, the city hall and the merchants' as
 
 ## Getting started
 
+### GLOP-95 design prototype
+
+The home page (`/`) displays the API-connected catalogue. The link
+**Prototype de commande** opens `/prototype/commande`, a design prototype,
+not a working checkout. Use the screen selector and the four preview states
+to review the cart, payment, confirmation, order history and order detail.
+All data and actions are simulated locally; no backend, payment provider or bank
+card details are required. Reset the demo to repeat the checkout flow.
+
+See the [GLOP-95 design handoff](design/GLOP-95.md) for the screen/state matrix,
+accessibility annotations, provisional business rules and pending PO sign-off.
+
 ### Prerequisites
 
 - Git
 - Node.js `22.22.2+` (22.x), `24.15.0+` (24.x), or `26+`, and npm.
   These are the versions supported by jsdom 31; Node 23 and 25 are not in its engine range.
-- A running `store-service` (see its README, or start the platform from `shoploc-infra`)
+- A running `store-service` for the API-connected catalogue only; not required for the GLOP-95 prototype
 
 ### Run locally
 

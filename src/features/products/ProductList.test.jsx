@@ -20,6 +20,18 @@ function renderCatalogue() {
 
 afterEach(() => {
     vi.unstubAllGlobals();
+    window.history.replaceState(null, '', '/');
+});
+
+it('ouvre le prototype à son URL dédiée sans charger le catalogue connecté', () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.replaceState(null, '', '/prototype/commande');
+
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: 'Mon panier' })).toBeDefined();
+    expect(fetchMock).not.toHaveBeenCalled();
 });
 
 describe('catalogue connecté à l’API', () => {
@@ -84,6 +96,8 @@ describe('catalogue connecté à l’API', () => {
         const products = await screen.findByRole('list', { name: 'Produits du catalogue' });
 
         expect(products.textContent).toContain('Pain au levain : 4.2 €');
+        expect(screen.getByRole('link', { name: 'Prototype de commande' }).getAttribute('href'))
+            .toBe('/prototype/commande');
         expect(screen.queryByRole('status')).toBeNull();
         expect((await auditAccessibility(container)).violations).toEqual([]);
     });
