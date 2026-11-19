@@ -87,4 +87,24 @@ describe('catalogue connecté à l’API', () => {
         expect(screen.queryByRole('status')).toBeNull();
         expect((await auditAccessibility(container)).violations).toEqual([]);
     });
+
+    it('permet de naviguer du catalogue à la fiche commerce puis de revenir', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => [],
+        }));
+        renderCatalogue();
+
+        await screen.findByText('Aucun produit disponible pour le moment.');
+        act(() => screen.getByRole('button', { name: 'Commerces' }).click());
+
+        expect(screen.getByRole('heading', { name: 'Commerces de démonstration' })).toBeDefined();
+        act(() => screen.getByRole('button', { name: 'Voir la fiche de Maison Levain' }).click());
+
+        expect(screen.getByRole('heading', { name: 'Maison Levain' })).toBeDefined();
+        expect(screen.getByText('12 rue Nationale').tagName).toBe('ADDRESS');
+        act(() => screen.getByRole('button', { name: 'Retour aux commerces' }).click());
+
+        expect(screen.getByRole('button', { name: 'Voir la fiche de Maison Levain' })).toBeDefined();
+    });
 });
