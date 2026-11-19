@@ -14,14 +14,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # full history, needed by SonarCloud
       - uses: actions/setup-node@v7
         with:
           node-version: lts/*
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - name: Run component tests and axe accessibility audit
-        run: npm test
+      - name: Run tests and axe accessibility audit with coverage
+        run: npm run test:coverage
+      - name: SonarCloud analysis
+        # Secrets are not available to pull requests from forks or Dependabot
+        if: >-
+          (github.event_name == 'push' && github.ref == 'refs/heads/develop') ||
+          (github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'dependabot[bot]')
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - run: npm run build
       - name: Build Docker image
         run: docker build -t shoploc-frontend .

@@ -27,5 +27,11 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: './src/test/setup.js',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],   // lcov = fichier lu par Sonar
+      include: ['src/**'],
+      exclude: ['src/main.jsx', '**/*.css'],
+    },
   },
 });
