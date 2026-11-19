@@ -53,7 +53,8 @@ ShopLoc connects customers, local merchants, the city hall and the merchants' as
 ### Prerequisites
 
 - Git
-- Node.js (LTS version) and npm
+- Node.js `22.22.2+` (22.x), `24.15.0+` (24.x), or `26+`, and npm.
+  These are the versions supported by jsdom 31; Node 23 and 25 are not in its engine range.
 - A running `store-service` (see its README, or start the platform from `shoploc-infra`)
 
 ### Run locally
