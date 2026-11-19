@@ -24,5 +24,13 @@ export default defineConfig({
     // En développement, /api est redirigé vers le store-service
     proxy: { '/api': 'http://localhost:8080' },
   },
-  test: { environment: 'node' },
+  test: {
+    environment: 'node',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],   // lcov = fichier lu par Sonar
+      include: ['src/**'],
+      exclude: ['src/main.jsx', '**/*.css'],
+    },
+  },
 });
