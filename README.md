@@ -121,12 +121,17 @@ shoploc-frontend
 ```bash
 npm run lint
 npm test
+npm run test:coverage
 npm run build
 ```
 
 CI runs the linter, the test suite with coverage (`npm run test:coverage`), and the build on every pull request targeting `develop` or `main`.
+The coverage command uses Vitest's V8 provider and writes `coverage/lcov.info` for SonarCloud.
 Component tests cover catalogue and store-detail loading, empty, error, and success states; axe audits run in the same Vitest job.
 Connected catalogue tests also cover pending requests, empty and populated API responses, HTTP errors, and network failures using a fresh Redux store and mocked fetch requests. No running backend is required.
+For GLOP-159, the GLOP-95 prototype stays in coverage: tests exercise cart totals,
+pickup slots, both simulated payment methods, confirmation, order tracking,
+cancellation, and recovery from preview errors. The SonarCloud threshold is unchanged.
 The JSDOM axe audit excludes color contrast because JSDOM does not render layout; browser-based contrast checks and manual accessibility review remain necessary.
 The pipeline (`.github/workflows/ci.yml`) also builds the Docker image. On every push to `develop` and `main`, it publishes the image to the GitHub Container Registry (`ghcr.io/shoploc-athena/shoploc-frontend`), tagged with the branch name and the commit SHA (`latest` for `main`).
 
