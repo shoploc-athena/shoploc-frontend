@@ -245,14 +245,14 @@ export default function OrderFlow() {
                         <p className="preview-description">Aperçu provisoire pour revue de conception</p>
                     </div>
                     <label className="screen-preview">
-                        Écran à prévisualiser
+                        <span>Écran à prévisualiser</span>
                         <select value={screen} onChange={(event) => navigate(event.target.value)}>
                             {Object.entries(SCREEN_TITLES).map(([id, title]) => (
                                 <option key={id} value={id}>{title}</option>
                             ))}
                         </select>
                     </label>
-                    <div className="preview-options" role="group" aria-label="Choisir un état d’interface">
+                    <fieldset className="preview-options" aria-label="Choisir un état d’interface">
                         {PREVIEW_STATES.map((state) => (
                             <button
                                 className={previewState === state.id ? 'preview-option preview-option--active' : 'preview-option'}
@@ -268,7 +268,7 @@ export default function OrderFlow() {
                                 {state.label}
                             </button>
                         ))}
-                    </div>
+                    </fieldset>
                     <button className="button button--secondary" type="button" onClick={resetPreview}>
                         Réinitialiser la démo
                     </button>
@@ -431,7 +431,7 @@ function CartScreen({ cart, cartTotal, previewState, onRetry, onBrowse, onQuanti
                                             <p>{item.detail}</p>
                                             <span className="item-unit-price">{formatPrice(item.price)} / unité</span>
                                         </div>
-                                        <div className="quantity-control" role="group" aria-label={`Quantité de ${item.name}`}>
+                                        <fieldset className="quantity-control" aria-label={`Quantité de ${item.name}`}>
                                             <button
                                                 type="button"
                                                 aria-label={`Retirer un ${item.name}`}
@@ -443,7 +443,7 @@ function CartScreen({ cart, cartTotal, previewState, onRetry, onBrowse, onQuanti
                                                 aria-label={`Ajouter un ${item.name}`}
                                                 onClick={() => onQuantityChange(item.id, 1)}
                                             >+</button>
-                                        </div>
+                                        </fieldset>
                                         <strong className="item-total">{formatPrice(item.price * item.quantity)}</strong>
                                     </li>
                                 ))}
@@ -475,6 +475,33 @@ function CartScreen({ cart, cartTotal, previewState, onRetry, onBrowse, onQuanti
                 </button>
                 <p className="secure-caption"><span aria-hidden="true">⌑</span> Paiement sécurisé à l’étape suivante</p>
             </aside>
+        </div>
+    );
+}
+
+function PaymentWait({ online, onComplete }) {
+    return (
+        <div className="payment-wait" role="status" aria-live="polite">
+            <span className="spinner" aria-hidden="true" />
+            <p className="eyebrow">{online ? 'PAIEMENT SÉCURISÉ' : 'COMMANDE'}</p>
+            <h2 id="payment-title">{online ? 'Confirmation en cours' : 'Validation de la commande'}</h2>
+            <p>
+                {online
+                    ? 'Nous attendons la confirmation de votre prestataire de paiement.'
+                    : 'Votre commande sera confirmée après validation.'}
+            </p>
+            {online && (
+                <>
+                    <div className="stripe-placeholder">
+                        <span className="stripe-wordmark" aria-label="Stripe">stripe</span>
+                        <span>Le champ de carte sécurisé Stripe apparaîtra ici.</span>
+                    </div>
+                    <p className="inline-hint">Aucune donnée de carte bancaire n’est saisie ou conservée par ShopLoc.</p>
+                </>
+            )}
+            <button className="button button--primary" type="button" onClick={onComplete}>
+                {online ? 'Simuler la confirmation de paiement' : 'Simuler la confirmation de commande'}
+            </button>
         </div>
     );
 }
@@ -517,32 +544,7 @@ function PaymentScreen({
         <div className="checkout-layout">
             <section className="content-card payment-card" aria-labelledby="payment-title">
                 {paymentPending ? (
-                    <div className="payment-wait" role="status" aria-live="polite">
-                        <span className="spinner" aria-hidden="true" />
-                        <p className="eyebrow">{paymentMethod === 'online' ? 'PAIEMENT SÉCURISÉ' : 'COMMANDE'}</p>
-                        <h2 id="payment-title">
-                            {paymentMethod === 'online' ? 'Confirmation en cours' : 'Validation de la commande'}
-                        </h2>
-                        <p>
-                            {paymentMethod === 'online'
-                                ? 'Nous attendons la confirmation de votre prestataire de paiement.'
-                                : 'Votre commande sera confirmée après validation.'}
-                        </p>
-                        {paymentMethod === 'online' && (
-                            <>
-                                <div className="stripe-placeholder">
-                                    <span className="stripe-wordmark" aria-label="Stripe">stripe</span>
-                                    <span>Le champ de carte sécurisé Stripe apparaîtra ici.</span>
-                                </div>
-                                <p className="inline-hint">Aucune donnée de carte bancaire n’est saisie ou conservée par ShopLoc.</p>
-                            </>
-                        )}
-                        <button className="button button--primary" type="button" onClick={onComplete}>
-                            {paymentMethod === 'online'
-                                ? 'Simuler la confirmation de paiement'
-                                : 'Simuler la confirmation de commande'}
-                        </button>
-                    </div>
+                    <PaymentWait online={paymentMethod === 'online'} onComplete={onComplete} />
                 ) : (
                     <>
                         <div className="section-heading">
@@ -584,11 +586,11 @@ function PaymentScreen({
                             <p className="inline-hint"><span aria-hidden="true">ⓘ</span> Le retrait se fait directement auprès de chaque commerçant.</p>
                         </section>
 
-                        <p id="pickup-requirement" className="validation-hint" role="status">
+                        <output id="pickup-requirement" className="validation-hint">
                             {pickupSlotsReady
                                 ? 'Tous les créneaux sont sélectionnés.'
                                 : 'Choisissez un créneau pour chaque commerce afin de continuer.'}
-                        </p>
+                        </output>
 
                         <section className="form-section" aria-labelledby="payment-method-title">
                             <div className="form-section-heading">
@@ -859,27 +861,27 @@ function OrderDetailScreen({
                         ))}
                     </ol>
                     {['ANNULEE', 'EXPIREE'].includes(order.status) && (
-                        <div className="tracking-terminal" role="status">
+                        <output className="tracking-terminal">
                             <span className="terminal-branch" aria-hidden="true">↳</span>
                             <span>État terminal</span>
                             <StatusBadge status={status} />
-                        </div>
+                        </output>
                     )}
                 </section>
                 {order.status === 'ANNULEE' && order.refundDue > 0 && (
-                    <div className="refund-banner" role="status">
+                    <output className="refund-banner">
                         <span className="refund-icon" aria-hidden="true">↗</span>
                         <span>
                             <strong>Remboursement dû : {formatPrice(order.refundDue)}</strong>
                             <small>Le suivi du remboursement sera affiché ici.</small>
                         </span>
-                    </div>
+                    </output>
                 )}
                 {cancelRequested && (
-                    <div className="request-banner" role="status">
+                    <output className="request-banner">
                         Simulation : demande d’annulation affichée localement. Aucune demande n’a été
                         envoyée au commerce.
-                    </div>
+                    </output>
                 )}
                 {!terminal && !cancelRequested && (
                     <button className="button button--secondary cancel-button" type="button" onClick={onOpenCancel}>
