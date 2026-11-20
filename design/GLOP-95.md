@@ -14,8 +14,8 @@ un tunnel de commande fonctionnel. L'accord et la recette finale du PO restent
 - Aucun appel à une API, à Stripe ou à un service de commande dans le prototype.
 - Aucune collecte de carte bancaire : l'emplacement Stripe est une illustration.
 - Aucune création de commande, annulation ou opération financière réelle.
-- Le catalogue statique ne remplace pas l'écran catalogue livré ; ses tests et
-  l'outillage axe relèvent de GLOP-96 et ne font pas partie de cette branche.
+- Le catalogue statique du prototype ne remplace pas le catalogue connecté
+  affiché sur la page d'accueil ; les tests de ce dernier relèvent de GLOP-96.
 
 ## Ouvrir et parcourir le prototype
 
@@ -26,7 +26,8 @@ npm ci
 npm run dev -- --host 127.0.0.1
 ```
 
-Ouvrir l'adresse affichée par Vite. Aucun backend ni base de données requis.
+Ouvrir `/prototype/commande` sur l'adresse affichée par Vite. Aucun backend ni
+base de données requis pour le prototype.
 
 Le sélecteur **Écran à prévisualiser** donne accès à chaque écran sans devoir
 terminer un paiement. Les boutons **Réussite**, **Vide**, **Chargement** et

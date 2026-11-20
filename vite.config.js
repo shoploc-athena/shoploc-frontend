@@ -25,7 +25,8 @@ export default defineConfig({
     proxy: { '/api': 'http://localhost:8080' },
   },
   test: {
-    environment: 'node',
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.js',
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],   // lcov = fichier lu par Sonar

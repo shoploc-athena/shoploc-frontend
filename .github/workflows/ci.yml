@@ -22,7 +22,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npm run test:coverage
+      - name: Run tests and axe accessibility audit with coverage
+        run: npm run test:coverage
       - name: SonarCloud analysis
         # Secrets are not available to pull requests from forks or Dependabot
         if: >-

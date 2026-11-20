@@ -43,7 +43,7 @@ ShopLoc connects customers, local merchants, the city hall and the merchants' as
 | UI | React |
 | State management | Redux Toolkit |
 | Offline support | Workbox (through `vite-plugin-pwa`) |
-| Tests | Vitest |
+| Tests | Vitest, Testing Library, axe-core |
 | Static analysis | ESLint |
 | Container | Docker (multi-stage build) with nginx |
 | CI/CD | GitHub Actions |
@@ -52,9 +52,10 @@ ShopLoc connects customers, local merchants, the city hall and the merchants' as
 
 ### GLOP-95 design prototype
 
-This branch presents a client checkout design prototype, not a working checkout.
-Run `npm run dev`, then use the screen selector and the four preview states to
-review the cart, payment, confirmation, order history and order detail.
+The home page (`/`) displays the API-connected catalogue. The link
+**Prototype de commande** opens `/prototype/commande`, a design prototype,
+not a working checkout. Use the screen selector and the four preview states
+to review the cart, payment, confirmation, order history and order detail.
 All data and actions are simulated locally; no backend, payment provider or bank
 card details are required. Reset the demo to repeat the checkout flow.
 
@@ -64,7 +65,8 @@ accessibility annotations, provisional business rules and pending PO sign-off.
 ### Prerequisites
 
 - Git
-- Node.js (LTS version) and npm
+- Node.js `22.22.2+` (22.x), `24.15.0+` (24.x), or `26+`, and npm.
+  These are the versions supported by jsdom 31; Node 23 and 25 are not in its engine range.
 - A running `store-service` for the API-connected catalogue only; not required for the GLOP-95 prototype
 
 ### Run locally
@@ -86,7 +88,8 @@ The application is available at `http://localhost:5173`. In development, request
 | `npm run build` | Build the application for production (`dist/`) |
 | `npm run preview` | Serve the production build locally |
 | `npm run lint` | Run the static analysis (ESLint) |
-| `npm test` | Run the unit tests (Vitest) |
+| `npm test` | Run component tests and automated axe accessibility audits |
+| `npm run test:coverage` | Run the same suite and generate coverage for SonarCloud |
 
 ## Configuration
 
@@ -103,7 +106,9 @@ shoploc-frontend
 ├── src/
 │   ├── app/                  # Redux store
 │   ├── features/             # One folder per feature (slice, components, tests)
-│   │   └── products/
+│   │   ├── products/
+│   │   └── stores/
+│   ├── test/                 # Shared Vitest setup and axe audit helper
 │   ├── App.jsx
 │   └── main.jsx
 ├── index.html
@@ -119,7 +124,10 @@ npm test
 npm run build
 ```
 
-The same three commands run in the CI on every pull request.
+CI runs the linter, the test suite with coverage (`npm run test:coverage`), and the build on every pull request targeting `develop` or `main`.
+Component tests cover catalogue and store-detail loading, empty, error, and success states; axe audits run in the same Vitest job.
+Connected catalogue tests also cover pending requests, empty and populated API responses, HTTP errors, and network failures using a fresh Redux store and mocked fetch requests. No running backend is required.
+The JSDOM axe audit excludes color contrast because JSDOM does not render layout; browser-based contrast checks and manual accessibility review remain necessary.
 The pipeline (`.github/workflows/ci.yml`) also builds the Docker image. On every push to `develop` and `main`, it publishes the image to the GitHub Container Registry (`ghcr.io/shoploc-athena/shoploc-frontend`), tagged with the branch name and the commit SHA (`latest` for `main`).
 
 ## Offline support (PWA)
