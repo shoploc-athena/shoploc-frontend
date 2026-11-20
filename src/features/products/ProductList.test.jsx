@@ -102,7 +102,7 @@ describe('catalogue connecté à l’API', () => {
         expect((await auditAccessibility(container)).violations).toEqual([]);
     });
 
-    it('permet de naviguer du catalogue à la fiche commerce puis de revenir', async () => {
+    it('permet de visiter une fiche commerce puis de revenir au catalogue connecté', async () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: true,
             json: async () => [],
@@ -120,5 +120,9 @@ describe('catalogue connecté à l’API', () => {
         act(() => screen.getByRole('button', { name: 'Retour aux commerces' }).click());
 
         expect(screen.getByRole('button', { name: 'Voir la fiche de Maison Levain' })).toBeDefined();
+        act(() => screen.getByRole('button', { name: 'Catalogue' }).click());
+
+        await screen.findByText('Aucun produit disponible pour le moment.');
+        expect(screen.queryByRole('heading', { name: 'Commerces de démonstration' })).toBeNull();
     });
 });
